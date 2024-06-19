@@ -9,6 +9,7 @@ const {
   deleteBus,
 } = require("../controllers/buses");
 
-router.route("/").get(getAllBuses);
+router.route("/").get(getAllBuses).post(createBus);
+router.route("/:id").get(getBus).patch(updateBus).delete(deleteBus);
 
 module.exports = router;
