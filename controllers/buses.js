@@ -2,7 +2,7 @@ const getAllBuses = async (req, res) => {
   res.send("all available buses");
 };
 const createBus = async (req, res) => {
-  res.send("create a new bus");
+  res.send(req.body);
 };
 const getBus = async (req, res) => {
   res.send("get a bus by id");
