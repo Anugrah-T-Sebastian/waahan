@@ -4,7 +4,11 @@ const buses = require("./routes/bus");
 const connectDB = require("./db/connect");
 require("dotenv").config();
 
+// model import
+const BusModel = require("./models/bus");
+
 // middleware
+app.use(express.static("./public"));
 app.use(express.json());
 
 // routes
@@ -21,6 +25,7 @@ const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
     console.log("Connected to DB...");
+    await BusModel.init(); // Ensure indexes for bus are created
     app.listen(port, console.log(`Server is running on port ${port}...`));
   } catch (error) {
     console.log(error);
