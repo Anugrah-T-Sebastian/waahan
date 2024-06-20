@@ -9,8 +9,8 @@ const BusSchema = new mongoose.Schema({
   busImageURL: { type: String },
 });
 
-// Middleware to set busId before saving the document
-BusSchema.pre("save", (next) => {
+// Middleware to set busId before validating the document
+BusSchema.pre("validate", function (next) {
   if (!this.busId) {
     this.busId = `bus${this._id}`;
   }

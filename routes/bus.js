@@ -7,7 +7,7 @@ const {
   getBus,
   updateBus,
   deleteBus,
-} = require("../controllers/buses");
+} = require("../controllers/bus");
 
 router.route("/").get(getAllBuses).post(createBus);
 router.route("/:id").get(getBus).patch(updateBus).delete(deleteBus);

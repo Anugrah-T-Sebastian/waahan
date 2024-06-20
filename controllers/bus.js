@@ -1,8 +1,12 @@
+const Bus = require("../models/bus");
+
 const getAllBuses = async (req, res) => {
   res.send("all available buses");
 };
 const createBus = async (req, res) => {
-  res.send(req.body);
+  const bus = new Bus(req.body); // Create a new instance of the Bus model with the request body
+  await bus.save(); // Save the bu
+  res.status(201).json({ bus });
 };
 const getBus = async (req, res) => {
   res.send("get a bus by id");
