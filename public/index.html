@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bus Management</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 600px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+      }
+      .form-group button {
+        padding: 10px 15px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .form-group button:hover {
+        background-color: #218838;
+      }
+      .message {
+        margin-top: 10px;
+      }
+      .bus-list {
+        width: 100%;
+        max-width: 600px;
+      }
+      .bus-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: white;
+      }
+      .bus-item button {
+        margin-left: 10px;
+        padding: 5px 10px;
+        border: none;
+        cursor: pointer;
+      }
+      .bus-item .update {
+        background-color: #007bff;
+        color: white;
+      }
+      .bus-item .update:hover {
+        background-color: #0056b3;
+      }
+      .bus-item .delete {
+        background-color: #dc3545;
+        color: white;
+      }
+      .bus-item .delete:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Create Bus</h2>
+      <form id="busForm">
+        <div class="form-group">
+          <label for="busType">Bus Type:</label>
+          <input type="text" id="busType" name="busType" required />
+        </div>
+        <div class="form-group">
+          <label for="fuelCost">Fuel Cost:</label>
+          <input type="number" id="fuelCost" name="fuelCost" required />
+        </div>
+        <div class="form-group">
+          <label for="equipmentCost">Equipment Cost:</label>
+          <input
+            type="number"
+            id="equipmentCost"
+            name="equipmentCost"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="busImageURL">Bus Image URL:</label>
+          <input type="url" id="busImageURL" name="busImageURL" />
+        </div>
+        <div class="form-group">
+          <button type="submit">Create Bus</button>
+        </div>
+      </form>
+      <div class="message" id="message"></div>
+    </div>
+
+    <div class="container">
+      <h2>Available Buses</h2>
+      <div class="bus-list" id="busList"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("busForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const busType = document.getElementById("busType").value;
+          const fuelCost = document.getElementById("fuelCost").value;
+          const equipmentCost = document.getElementById("equipmentCost").value;
+          const busImageURL = document.getElementById("busImageURL").value;
+
+          const busData = {
+            busType,
+            fuelCost,
+            equipmentCost,
+            busImageURL,
+          };
+
+          try {
+            const response = await fetch("http://localhost:3000/api/v1/bus", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(busData),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              document.getElementById("message").textContent =
+                "Bus created successfully!";
+              document.getElementById("message").style.color = "green";
+              loadBuses(); // Reload the bus list
+            } else {
+              const errorData = await response.json();
+              document.getElementById("message").textContent =
+                errorData.message;
+              document.getElementById("message").style.color = "red";
+            }
+          } catch (error) {
+            document.getElementById("message").textContent =
+              "Error: " + error.message;
+            document.getElementById("message").style.color = "red";
+          }
+        });
+
+      async function loadBuses() {
+        try {
+          const response = await fetch("http://localhost:3000/api/v1/bus");
+          if (response.ok) {
+            const buses = await response.json();
+            console.log(buses);
+            const busList = document.getElementById("busList");
+            busList.innerHTML = "";
+            buses.forEach((bus) => {
+              const busItem = document.createElement("div");
+              busItem.className = "bus-item";
+              busItem.innerHTML = `
+                            <span>${bus.busType} - $${bus.fuelCost} - $${bus.equipmentCost}</span>
+                            <div>
+                                <button class="update" onclick="updateBus('${bus.busId}')">Update</button>
+                                <button class="delete" onclick="deleteBus('${bus.busId}')">Delete</button>
+                            </div>
+                        `;
+              busList.appendChild(busItem);
+            });
+          } else {
+            console.error("Failed to load buses");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function updateBus(id) {
+        const newBusType = prompt("Enter new bus type:");
+        const newFuelCost = prompt("Enter new fuel cost:");
+        const newEquipmentCost = prompt("Enter new equipment cost:");
+        const newBusImageURL = prompt("Enter new bus image URL:");
+
+        const busData = {
+          busType: newBusType,
+          fuelCost: newFuelCost,
+          equipmentCost: newEquipmentCost,
+          busImageURL: newBusImageURL,
+        };
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/v1/bus/${id}`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(busData),
+            }
+          );
+
+          if (response.ok) {
+            loadBuses(); // Reload the bus list
+          } else {
+            console.error("Failed to update bus");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function deleteBus(id) {
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/v1/bus/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (response.ok) {
+            loadBuses(); // Reload the bus list
+          } else {
+            console.error("Failed to delete bus");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      // Load buses when the page loads
+      window.onload = loadBuses;
+    </script>
+  </body>
+</html>
